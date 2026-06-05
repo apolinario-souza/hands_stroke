@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jun  5 18:26:01 2026
+
+@author: lemeu
+"""
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -179,7 +186,57 @@ for suj in sujeitos:
                         
                         dados_completos[col].at[suj,coluna] = medias[i]
 
+# ================================
+# Adicionar novas variáveis calculadas
+# ================================
 
+# Adicionar NC_ER2sub e time2Sub_NC aos dados_completos
+dados_completos['NC_ER2sub'] = pd.DataFrame(index=sujeitos,
+                                            columns=['ME_pre','MD_pre','ME_pos','MD_pos'])
+
+dados_completos['time2Sub_NC'] = pd.DataFrame(index=sujeitos,
+                                              columns=['ME_pre','MD_pre','ME_pos','MD_pos'])
+
+# Verificar se as colunas necessárias existem
+if 'ER' in dados_completos and 'ER_1sub' in dados_completos and 'NC' in dados_completos and 'TM' in dados_completos and 'Tempo_primeiro_sub' in dados_completos:
+    
+    for suj in sujeitos:
+        for cond in ['ME_pre','MD_pre','ME_pos','MD_pos']:
+            
+            # Verificar se todos os dados necessários existem
+            er_val = dados_completos['ER'].at[suj, cond] if cond in dados_completos['ER'].columns else None
+            er_1sub_val = dados_completos['ER_1sub'].at[suj, cond] if cond in dados_completos['ER_1sub'].columns else None
+            nc_val = dados_completos['NC'].at[suj, cond] if cond in dados_completos['NC'].columns else None
+            tm_val = dados_completos['TM'].at[suj, cond] if cond in dados_completos['TM'].columns else None
+            tempo_primeiro_val = dados_completos['Tempo_primeiro_sub'].at[suj, cond] if cond in dados_completos['Tempo_primeiro_sub'].columns else None
+            
+            # Verificar se não há valores faltantes
+            if (pd.notna(er_val) and pd.notna(er_1sub_val) and pd.notna(nc_val) and 
+                pd.notna(tm_val) and pd.notna(tempo_primeiro_val)):
+                
+                try:
+                    # Calcular NC_ER2sub
+                    nc_er2sub = (er_1sub_val - er_val) / nc_val
+                    dados_completos['NC_ER2sub'].at[suj, cond] = nc_er2sub
+                    
+                    # Calcular time2Sub_NC
+                    tempo_segundo_sub = tm_val - tempo_primeiro_val
+                    time2sub_nc = tempo_segundo_sub / nc_val
+                    dados_completos['time2Sub_NC'].at[suj, cond] = time2sub_nc
+                    
+                except Exception as e:
+                    # Se houver erro no cálculo, deixar em branco
+                    dados_completos['NC_ER2sub'].at[suj, cond] = np.nan
+                    dados_completos['time2Sub_NC'].at[suj, cond] = np.nan
+            else:
+                # Dados faltantes, deixar em branco
+                dados_completos['NC_ER2sub'].at[suj, cond] = np.nan
+                dados_completos['time2Sub_NC'].at[suj, cond] = np.nan
+else:
+    print("Aviso: Colunas necessárias (ER, ER_1sub, NC, TM, Tempo_primeiro_sub) não encontradas nos dados")
+
+# Adicionar as novas colunas à lista de colunas para exportação
+colunas_novas_com_calc = colunas_novas + ['NC_ER2sub', 'time2Sub_NC']
 
 # ================================
 # Criar arquivo Excel
@@ -190,7 +247,7 @@ with pd.ExcelWriter("resultados_raw.xlsx",
     
     
     # planilhas individuais
-    for col in colunas_novas:
+    for col in colunas_novas_com_calc:
         
         df_saida = pd.concat([control,
                               dados_completos[col]],
@@ -298,7 +355,7 @@ def plotar_fator(df, fator, nome_variavel, pasta_saida):
 # gerar gráficos
 # ======================================
 
-for col in colunas_novas:
+for col in colunas_novas_com_calc:
 
     df_plot = pd.concat([control, dados_completos[col]], axis=1)
 
@@ -371,7 +428,7 @@ writer_lesao = pd.ExcelWriter("resultados_sem_outlier_lesao.xlsx", engine="openp
 writer_etcc = pd.ExcelWriter("resultados_sem_outlier_etcc.xlsx", engine="openpyxl")
 
 
-for col in colunas_novas:
+for col in colunas_novas_com_calc:
 
     df_plot = pd.concat([control, dados_completos[col]], axis=1)
 

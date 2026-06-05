@@ -3,7 +3,7 @@
 
 import pandas as pd
 
-arquivo = "resultados_sem_outlier_etcc.xlsx"
+arquivo = "resultados_sem_outlier_lesao.xlsx" # MUDAR
 
 # ler todas as abas
 sheets = pd.read_excel(arquivo, sheet_name=None)

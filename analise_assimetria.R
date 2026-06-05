@@ -4,7 +4,7 @@
 # Welch ANOVA entre grupos: NS vs LS vs RS
 # =============================================================================
 
-setwd("C:/Users/lemeu/master_daiana")
+setwd("C:/Users/lemeu/hands_stroke")
 
 # --- 1. Pacotes --------------------------------------------------------------
 
@@ -42,6 +42,7 @@ df <- df %>%
 
 # --- 3. Calcular índice de assimetria ----------------------------------------
 
+
 df_ai <- df %>%
   group_by(sub, lesion, variable, hand) %>%
   summarise(
@@ -56,8 +57,14 @@ df_ai <- df %>%
   ) %>%
   filter(!is.na(LH), !is.na(RH), (RH + LH) != 0) %>%
   mutate(
-    AI = RH - LH
+    AI= case_when(
+      lesion == "NS" ~ (RH - LH)/(RH + LH) * 100,
+      lesion == "LS" ~ (LH - RH)/(LH + RH) * 100, 
+      lesion == "RS" ~ (RH - LH)/(RH + LH) *100,
+      TRUE ~ NA_real_
   )
+)
+
 
 # --- 4. Função principal: Welch ANOVA ----------------------------------------
 
@@ -199,12 +206,11 @@ gerar_graficos <- function(dados_ai, variaveis, pasta = "graficos_AI") {
         )
       ) +
       labs(
-        title = paste("Índice de Assimetria —", v),
-        subtitle = "AI = (RH − LH) / (RH + LH) × 100",
-        x = "Grupo",
-        y = "AI (%)",
+        
+        x = "",
+        y = "",
         fill = "Grupo",
-        caption = "Positivo: vantagem mão direita | Negativo: vantagem mão esquerda"
+        
       ) +
       theme_classic(base_size = 13) +
       theme(
@@ -212,7 +218,7 @@ gerar_graficos <- function(dados_ai, variaveis, pasta = "graficos_AI") {
       )
     
     ggsave(
-      filename = file.path(pasta, paste0("AI_", nome_seguro, ".png")),
+      filename = file.path(pasta, paste0(nome_seguro, ".png")),
       plot = p,
       width = 6,
       height = 5,
@@ -272,25 +278,8 @@ sink_ai_md <- function(dados_ai, variaveis, arquivo_saida = "resultados_AI.md") 
       filter(lesion == "NS") %>%
       pull(AI)
     
-    writeLines("### Validação: AI do grupo NS vs. zero\n", con)
+   
     
-    if (length(ns_vals) >= 2) {
-      
-      t_ns <- t.test(ns_vals, mu = 0)
-      
-      writeLines(sprintf(
-        "t(%d) = %.3f, p = %.4f, média = %.2f%%\n\n",
-        as.integer(t_ns$parameter),
-        t_ns$statistic,
-        t_ns$p.value,
-        mean(ns_vals, na.rm = TRUE)
-      ), con)
-      
-    } else {
-      
-      writeLines("Não há sujeitos suficientes no grupo NS para o teste t.\n\n", con)
-      
-    }
     
     # Welch ANOVA
     
