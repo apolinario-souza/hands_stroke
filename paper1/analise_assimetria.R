@@ -4,7 +4,7 @@
 # Welch ANOVA entre grupos: NS vs LS vs RS
 # =============================================================================
 
-setwd("C:/Users/lemeu/hands_stroke")
+setwd("C:/Users/lemeu/hands_stroke/paper1")
 
 # --- 1. Pacotes --------------------------------------------------------------
 
@@ -183,7 +183,7 @@ for (v in variaveis) {
 
 # --- 6. Gráficos -------------------------------------------------------------
 
-gerar_graficos <- function(dados_ai, variaveis, pasta = "graficos_AI") {
+gerar_graficos <- function(dados_ai, variaveis, pasta = "figures") {
   
   dir.create(pasta, showWarnings = FALSE)
   

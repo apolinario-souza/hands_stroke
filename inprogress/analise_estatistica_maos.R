@@ -4,7 +4,7 @@
 # Efeitos fixos: lesion (NS/LS/RS) x hand (LH/RH)
 # Efeito aleatório: sujeito (sub)
 # =============================================================================
-setwd("C:/Users/lemeu/master_daiana")
+setwd("C:/Users/lemeu/hands_stroke/inprogress")
 
 # --- 1. Pacotes necessários ---------------------------------------------------
 library(readxl)

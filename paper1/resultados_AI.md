@@ -1,6 +1,6 @@
 # Resultados — Índice de Assimetria Manual (AI)
 
-**Data:** 05/06/2026 18:42 
+**Data:** 07/06/2026 13:23 
 
 **Fórmula:** `AI = (RH - LH) / (RH + LH) × 100`  
 
